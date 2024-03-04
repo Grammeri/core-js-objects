@@ -385,33 +385,127 @@ function group(arr, keySelector, valueSelector) {
  *  For more examples see unit tests.
  */
 
+class CSSSelector {
+  constructor() {
+    this.selector = '';
+    this.order = '';
+  }
+
+  element(value) {
+    this.checkOrder('element');
+    this.checkDuplicate('element');
+    this.selector += value;
+    this.order += '1';
+    return this;
+  }
+
+  id(value) {
+    this.checkOrder('id');
+    this.checkDuplicate('id');
+    this.selector += `#${value}`;
+    this.order += '2';
+    return this;
+  }
+
+  class(value) {
+    this.checkOrder('class');
+    this.selector += `.${value}`;
+    this.order += '3';
+    return this;
+  }
+
+  attr(value) {
+    this.checkOrder('attr');
+    this.selector += `[${value}]`;
+    this.order += '4';
+    return this;
+  }
+
+  pseudoClass(value) {
+    this.checkOrder('pseudoClass');
+    this.selector += `:${value}`;
+    this.order += '5';
+    return this;
+  }
+
+  pseudoElement(value) {
+    this.checkOrder('pseudoElement');
+    this.checkDuplicate('pseudoElement');
+    this.selector += `::${value}`;
+    this.order += '6';
+    return this;
+  }
+
+  combine(selector1, combinator, selector2) {
+    this.selector = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return this;
+  }
+
+  stringify() {
+    return this.selector;
+  }
+
+  checkOrder(type) {
+    const orderMap = {
+      element: '1',
+      id: '2',
+      class: '3',
+      attr: '4',
+      pseudoClass: '5',
+      pseudoElement: '6',
+    };
+    if (this.order && this.order[this.order.length - 1] > orderMap[type]) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+  }
+
+  checkDuplicate(type) {
+    let typeCode;
+    if (type === 'element') {
+      typeCode = '1';
+    } else if (type === 'id') {
+      typeCode = '2';
+    } else if (type === 'pseudoElement') {
+      typeCode = '6';
+    }
+
+    if (this.order.includes(typeCode)) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+  }
+}
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    return new CSSSelector().element(value);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    return new CSSSelector().id(value);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    return new CSSSelector().class(value);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    return new CSSSelector().attr(value);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    return new CSSSelector().pseudoClass(value);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    return new CSSSelector().pseudoElement(value);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return new CSSSelector().combine(selector1, combinator, selector2);
   },
 };
 
